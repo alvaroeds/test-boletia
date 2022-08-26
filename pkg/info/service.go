@@ -15,7 +15,7 @@ type service struct {
 
 func NewService(db *sql.DB) Service {
 	return &service{
-		repo: NewRepository(db),
+		repo: NewRepository(db, 5),
 	}
 }
 

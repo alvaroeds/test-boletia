@@ -7,26 +7,26 @@ import (
 	"time"
 )
 
-const timeout = time.Second * 5
-
 type Repository interface {
 	InsertRequest(ctx context.Context, req *InsertRequest) error
 }
 
 type postgres struct {
-	db *sql.DB
+	db      *sql.DB
+	timeout int
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *sql.DB, timeout int) Repository {
 	return &postgres{
-		db: db,
+		db:      db,
+		timeout: timeout,
 	}
 }
 
 func (p postgres) InsertRequest(ctx context.Context, req *InsertRequest) error {
 	q := `INSERT INTO request (method, path, code, "time") VALUES($1, $2, $3, $4);`
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(p.timeout)*time.Second)
 	defer cancel()
 
 	stmt, err := p.db.PrepareContext(ctx, q)

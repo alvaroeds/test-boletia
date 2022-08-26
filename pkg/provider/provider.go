@@ -63,6 +63,7 @@ func (p Provider) load() {
 		})
 		if err != nil {
 			log.Println(err)
+			log.Println(value)
 			continue
 		}
 	}

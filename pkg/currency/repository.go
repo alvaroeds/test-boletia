@@ -15,22 +15,22 @@ type Repository interface {
 	Insert(ctx context.Context, req *InsertCurrency) error
 }
 
-const timeout = 5 * time.Second
-
 type postgres struct {
-	db *sql.DB
+	db      *sql.DB
+	timeout int
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *sql.DB, timeout int) Repository {
 	return &postgres{
-		db: db,
+		db:      db,
+		timeout: timeout,
 	}
 }
 
 func (p postgres) GetAll(ctx context.Context) ([]GetAllCurrency, error) {
 	q := `select DISTINCT ON (code) code,"value", created_at from currency order by code, created_at desc;`
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(p.timeout)*time.Second)
 	defer cancel()
 
 	res := make([]GetAllCurrency, 0)
@@ -81,7 +81,7 @@ func (p postgres) GetByID(ctx context.Context, f CurrencyFilterRequest) ([]GetAl
 		q.WriteString("order by created_at desc")
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(p.timeout)*time.Second)
 	defer cancel()
 
 	res := make([]GetAllCurrency, 0)
@@ -111,7 +111,7 @@ func (p postgres) GetByID(ctx context.Context, f CurrencyFilterRequest) ([]GetAl
 func (p postgres) Insert(ctx context.Context, req *InsertCurrency) error {
 	q := `INSERT INTO currency (code, "value") VALUES($1, $2);`
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(p.timeout)*time.Second)
 	defer cancel()
 
 	stmt, err := p.db.PrepareContext(ctx, q)
