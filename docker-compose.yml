@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:13.5-alpine
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: 'boletia'
+      POSTGRES_USER: 'boletia'
+      POSTGRES_DB: 'boletia'
